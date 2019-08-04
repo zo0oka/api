@@ -14,3 +14,8 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/login/facebook', 'ApiController@redirectToFacebookProvider');
+Route::get('/login/facebook/callback', 'ApiController@handleProviderFacebookCallback');
+Route::get('/googleredirect', 'ApiController@redirectToGoogleProvider');
+Route::get('/googlecallback', 'ApiController@handleProviderGoogleCallback');

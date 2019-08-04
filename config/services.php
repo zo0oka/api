@@ -13,7 +13,17 @@ return [
     | to have a conventional place to find your various credentials.
     |
     */
-
+    'google' => [
+        'client_id' => '145221138813-maou2o1qpsckdj4fs3ni3p8c5pfd4qh0.apps.googleusercontent.com',
+        'client_secret' => 'ECkddNfkrMUQI_FZszRzSR72',
+        'redirect' => 'http://localhost:8000/googlecallback',
+    ],
+    'facebook' => [
+    'client_id' => '483783128843592',
+    'client_secret' => '8b15a8c94337e841bacecf2e58aef745',
+    'default_graph_version' => 'v2.12',
+    'redirect' => 'http://localhost:8000/login/facebook/callback',
+    ],
     'mailgun' => [
         'domain' => env('MAILGUN_DOMAIN'),
         'secret' => env('MAILGUN_SECRET'),
