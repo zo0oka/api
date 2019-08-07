@@ -62,13 +62,13 @@ class ApiController extends Controller
                 $user->phone=$request->phone;
             }
             catch (Exception $e) {
-    
+
             }
             $user->save();
             if ($this->loginAfterSignUp) {
                 return $this->login($request);
             }
-     
+
             return response()->json([
                 'success' => true,
                 'data' => $user
@@ -83,7 +83,7 @@ class ApiController extends Controller
                 'message'=> "you registered with this mail before"
             ], 400);
         }
-               
+
     }
 
     public function login(Request $request)
@@ -148,8 +148,8 @@ class ApiController extends Controller
         } catch (JWTException $exception) {
             return response()->json(['success' => false]);
         }
-       
-            
+
+
         return response()->json(['success' => true]);
     }
 
@@ -163,9 +163,30 @@ class ApiController extends Controller
   public function handleProviderGoogleCallback()
   {
 
-          $auth_user = Socialite::driver('google')->user();
-          $existUser = User::where('email',$auth_user->email)->first();
-          $token=$this->authToken($auth_user,$existUser);
+          $google_user = Socialite::driver('google')->user();
+          $existUser = User::where('email',$google_user->email)->first();
+          $auth_user = new User();
+          $auth_user->name = $google_user->name;
+          $auth_user->email = $google_user->email;
+          if($existUser != null){
+            $input = $auth_user->email;
+            $jwt_token = null;
+
+            if (!$jwt_token = JWTAuth::fromUser($existUser)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid Email or Password',
+                ], 401);
+            }
+
+            return response()->json([
+                'success' => true,
+                'token' => $jwt_token,
+            ]);
+          }else{
+              $token=$this->authToken($auth_user);
+          }
+
           return $token;
 
   }
