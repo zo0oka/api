@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use JWTAuth;
 use Socialite;
 use Tymon\JWTAuth\Exceptions\JWTException;
- 
+use Illuminate\Support\Facades\Log;
 class ApiController extends Controller
 {
     public $loginAfterSignUp = true;
@@ -27,30 +27,45 @@ class ApiController extends Controller
     }
     public function register(RegisterAuthRequest $request)
     {
-        $user = new User();
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->password = bcrypt($request->password);
-        try{
-            $user->phone=$request->phone;
+        $existUser = User::where('email',$request->email)->first();
+        Log::info($existUser);
+        if(empty($existUser))
+        {
+            $user = new User();
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->password = bcrypt($request->password);
+            try{
+                $user->phone=$request->phone;
+            }
+            catch (Exception $e) {
+    
+            }
+            $user->save();
+            if ($this->loginAfterSignUp) {
+                return $this->login($request);
+            }
+     
+            return response()->json([
+                'success' => true,
+                'data' => $user
+            ], 200);
+
         }
-        catch (Exception $e) {
-            
+        else
+        {
+            Log::info("same");
+            return response()->json([
+                'success' => false,
+                'message'=> "you registered with this mail before"
+            ], 400);
         }
-        $user->save();
- 
-        if ($this->loginAfterSignUp) {
-            return $this->login($request);
-        }
- 
-        return response()->json([
-            'success' => true,
-            'data' => $user
-        ], 200);
+               
     }
  
     public function login(Request $request)
     {
+        Log::info("login");
         $input = $request->only('email', 'password');
         $jwt_token = null;
  
@@ -60,10 +75,11 @@ class ApiController extends Controller
                 'message' => 'Invalid Email or Password',
             ], 401);
         }
- 
+        $existUser = User::where('email',$request->email)->first();
         return response()->json([
             'success' => true,
             'token' => $jwt_token,
+            'data'=> $existUser,
         ]);
     }
  
@@ -97,6 +113,19 @@ class ApiController extends Controller
         $user = JWTAuth::authenticate($request->token);
  
         return response()->json(['user' => $user]);
+    }
+    public function validateToken(Request $request)
+    {
+        try {
+            $this->validate($request, [
+                'token' => 'required'
+            ]);
+        } catch (JWTException $exception) {
+            return response()->json(['success' => false]);
+        }
+       
+            
+        return response()->json(['success' => true]);
     }
 
 

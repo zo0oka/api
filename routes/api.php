@@ -21,7 +21,7 @@ use Illuminate\Http\Request;
 
 Route::post('login', 'ApiController@login');
 Route::post('register', 'ApiController@register');
-
+Route::post('validate/token', 'ApiController@validateToken');
 
 
 Route::group(['middleware' => 'auth.jwt'], function () {
